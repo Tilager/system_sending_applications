@@ -2,52 +2,51 @@ package ru.courses.api.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.courses.api.models.ApplicationModel;
-import ru.courses.api.models.ClientModel;
-import ru.courses.api.repositories.ApplicationsRepo;
-import ru.courses.api.repositories.ClientsRepo;
+import ru.courses.api.models.CourseModel;
+import ru.courses.api.repositories.CoursesRepo;
 
 import java.util.List;
 
 @Service
-public class ClientsService {
-    private final ClientsRepo repo;
+public class CoursesService {
+    private final CoursesRepo repo;
 
     @Autowired
-    public ClientsService(ClientsRepo clientsRepo) {
-        this.repo = clientsRepo;
+    public CoursesService(CoursesRepo coursesRepo) {
+        this.repo = coursesRepo;
     }
 
-    public ClientModel createClient(ClientModel client) {
-        return repo.save(client);
+    public CourseModel createCourse(CourseModel course) {
+        return repo.save(course);
     }
 
-    public ClientModel getClientByID(Integer id) {
+    public CourseModel getCourseByID(Integer id) {
         return repo.findById(id).orElse(null);
     }
 
-    public List<ClientModel> getAllClients() {
+    public List<CourseModel> getAllCourses() {
         return repo.findAll();
     }
 
-    public ClientModel updateClient(ClientModel newClient) {
-        ClientModel client = getClientByID(newClient.getId());
+    public CourseModel updateCourse(Integer id, CourseModel newCourse) {
+        CourseModel course = getCourseByID(id);
 
-        if (client == null) {
-            throw new RuntimeException("Client id = " + newClient.getId() + ". Not found");
+        if (course == null) {
+            throw new RuntimeException("Course id = " + newCourse.getId() + ". Not found");
         } else {
-            client.setName(newClient.getName());
-            client.setSurname(newClient.getSurname());
-            client.setPatronymic(newClient.getPatronymic());
-            client.setPhone(newClient.getPhone());
-            client.setEmail(newClient.getEmail());
-            client.setBirthday(newClient.getBirthday());
+            course.setName(newCourse.getName());
+            course.setDescription(newCourse.getDescription());
+            course.setDuration(newCourse.getDuration());
+            course.setLanguage(newCourse.getLanguage());
+            course.setPrice(newCourse.getPrice());
 
-            return repo.save(client);
+            course.setTeacher(newCourse.getTeacher());
+
+            return repo.save(course);
         }
     }
 
-    public void removeApplicationByID(int id) {
+    public void removeCourseByID(int id) {
         repo.deleteById(id);
     }
 }

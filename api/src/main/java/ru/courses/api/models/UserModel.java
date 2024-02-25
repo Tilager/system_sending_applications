@@ -6,26 +6,31 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.lang.NonNull;
 
 import java.util.Date;
 
 @Entity
-@Table(name="clients")
+@Table(name="users")
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-public class ClientModel {
+public class UserModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private String surname;
-    private String name;
-    private String patronymic;
+    @Column(nullable = false)
+    private String login;
 
-    @JsonFormat(pattern="yyyy-MM-dd")
-    private Date birthday;
-    private String phone;
-    private String email;
+    @Column(nullable = false)
+    private String password;
+
+    private String type;
+
+    @ManyToOne
+    @JoinColumn(name = "client_id")
+    private ClientModel client;
+
 }

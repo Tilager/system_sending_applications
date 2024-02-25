@@ -2,47 +2,49 @@ package ru.courses.api.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.courses.api.models.GroupModel;
-import ru.courses.api.repositories.GroupsRepo;
+import ru.courses.api.models.TeacherModel;
+import ru.courses.api.repositories.TeachersRepo;
 
 import java.util.List;
 
 @Service
-public class GroupsService {
-    private final GroupsRepo repo;
+public class TeachersService {
+    private final TeachersRepo repo;
 
     @Autowired
-    public GroupsService(GroupsRepo groupsRepo) {
-        this.repo = groupsRepo;
+    public TeachersService(TeachersRepo teachersRepo) {
+        this.repo = teachersRepo;
     }
 
-    public GroupModel createGroup(GroupModel group) {
-        return repo.save(group);
+    public TeacherModel createTeacher(TeacherModel teacher) {
+        return repo.save(teacher);
     }
 
-    public GroupModel getGroupByID(Integer id) {
+    public TeacherModel getTeacherByID(Integer id) {
         return repo.findById(id).orElse(null);
     }
 
-    public List<GroupModel> getAllGroups() {
+    public List<TeacherModel> getAllTeachers() {
         return repo.findAll();
     }
 
-    public GroupModel updateGroup(GroupModel newGroup) {
-        GroupModel group = getGroupByID(newGroup.getId());
+    public TeacherModel updateTeacher(int id, TeacherModel newTeacher) {
+        TeacherModel teacher = getTeacherByID(id);
 
-        if (group == null) {
-            throw new RuntimeException("Group id = " + newGroup.getId() + ". Not found");
+        if (teacher == null) {
+            throw new RuntimeException("Teacher id = " + newTeacher.getId() + ". Not found");
         } else {
-            group.setCapacity(newGroup.getCapacity());
-            group.setName(newGroup.getName());
-            group.setCourse(newGroup.getCourse());
+            teacher.setName(newTeacher.getName());
+            teacher.setSurname(newTeacher.getSurname());
+            teacher.setPatronymic(newTeacher.getPatronymic());
+            teacher.setEmail(newTeacher.getEmail());
+            teacher.setPhone(newTeacher.getPhone());
 
-            return repo.save(group);
+            return repo.save(teacher);
         }
     }
 
-    public void removeGroupByID(int id) {
+    public void removeTeacherByID(int id) {
         repo.deleteById(id);
     }
 }

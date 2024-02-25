@@ -2,7 +2,7 @@
   <div class="container mt-5">
     <div class="card">
       <div class="card-header">
-        Изменение группы
+        Изменение пользователя
       </div>
       <div class="card-body">
         <div class="alert alert-success" role="alert" v-if="alert === 'success'">
@@ -13,33 +13,45 @@
         </div>
 
         <div class="mb-3">
-          <label for="">Название</label>
-          <input v-model="model.group.name"
+          <label for="">Логин</label>
+          <input v-model="model.user.login"
                  type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.group.name.$dirty && v$.model.group.name.$error)}">
+                 :class="{'is-invalid': (v$.model.user.login.$dirty && v$.model.user.login.$error)}">
         </div>
         <div class="mb-3">
-          <label for="">Вместимость</label>
-          <input v-model="model.group.capacity"
+          <label for="">Пароль</label>
+          <input v-model="model.user.password"
                  type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.group.capacity.$dirty && v$.model.group.capacity.$error)}">
+                 :class="{'is-invalid': (v$.model.user.password.$dirty && v$.model.user.password.$error)}">
         </div>
-
         <div class="mb-3">
-          <label for="">Курс</label>
+          <label>Тип</label>
 
           <select class="form-control"
-                  :class="{'is-invalid': (v$.model.group.course.$dirty && v$.model.group.course.$error)}"
-                  @change="setCourse"
+                  :class="{'is-invalid': (v$.model.user.type.$dirty && v$.model.user.type.$error)}"
+                  v-model="model.user.type"
           >
-            <option disabled selected value> Выберите курс </option>
-            <option v-for="course in courses"
-                    :value="course.id" :selected="course.id === model.group.course.id"> {{ course.name }} ({{ course.language }})</option>
+            <option value="user">Пользователь</option>
+            <option value="admin">Администратор</option>
           </select>
         </div>
 
         <div class="mb-3">
-          <button class="btn btn-primary" @click="updateGroups" type="button">Сохранить</button>
+          <label>Клиент</label>
+
+          <select class="form-control"
+                  :class="{'is-invalid': (v$.model.user.client.$dirty && v$.model.user.client.$error)}"
+                  @change="setClient" :disabled="model.user.type !== 'user'"
+          >
+            <option disabled :selected="model.user.client === null" value> Выберите клиента </option>
+            <option v-for="client in clients"
+                    :value="client.id">
+              {{ client.surname }} {{ client.name }} {{ client.patronymic }} </option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <button class="btn btn-primary" @click="updateUser" type="button">Сохранить</button>
         </div>
       </div>
     </div>
@@ -52,53 +64,57 @@
   import {email, integer, minValue, numeric, required} from "@vuelidate/validators";
 
   export default {
-    name: 'groupsEdit',
+    name: 'usersEdit',
     data() {
       return {
         alert: '',
         model: {
-          group: {
-            name: '',
-            capacity: null,
-            course: null
+          user: {
+            login: '',
+            password: '',
+            type: '',
+            client: null
           }
         },
-        courses: []
+        clients: []
       }
     },
     mounted() {
-      this.getGroup(this.$route.params.id)
+      this.getUser(this.$route.params.id)
 
-      axios.get('http://localhost:8081/api/courses/all').then(res => {
-        this.courses = res.data
+      axios.get('http://localhost:8081/api/clients/all').then(res => {
+        this.clients = res.data
       })
     },
     methods: {
-      setCourse(event) {
-        this.model.group.course = this.courses.find(c => c.id == event.target.value)
+      setClient(event) {
+        this.model.user.client = this.clients.find(c => c.id == event.target.value)
       },
-      getGroup(id) {
-        axios.get(`http://localhost:8081/api/groups/${id}`).then(res => {
+      getUser(id) {
+        axios.get(`http://localhost:8081/api/users/${id}`).then(res => {
           if (!res.data) {
             alert("Страница не найдена!")
-            window.location.replace("/groups")
+            window.location.replace("/users")
           }
           else {
-            this.model.group = res.data
+            this.model.user = res.data
           }
         })
       },
-      updateGroups() {
+      updateUser() {
         if (this.v$.$invalid) {
           this.v$.$touch()
           this.alert = 'danger'
           return
         }
 
-        axios.post(`http://localhost:8081/api/groups/${this.$route.params.id}`,
-            this.model.group)
+        if (this.model.user.type !== 'user')
+          this.model.user.client = null
+
+        axios.post(`http://localhost:8081/api/users/${this.$route.params.id}`,
+            this.model.user)
             .then(res => {
-              this.model.group = res.data
+              this.model.user = res.data
               this.alert = 'success'
               this.v$.$reset()
             })
@@ -108,10 +124,13 @@
     validations() {
       return {
         model: {
-          group: {
-            name: { required },
-            capacity: {required, integer, minValue: minValue(1)},
-            course: {required}
+          user: {
+            login: { required },
+            password: { required },
+            type: { required },
+            client: { required: val => {
+                return this.model.user.type === 'user' ? val !== null : true
+              }}
           }
         }
       }

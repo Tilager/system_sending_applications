@@ -3,9 +3,9 @@
     <div class="card mt-5">
       <div class="card-header">
         <h4>
-          Группы
-          <router-link to="/groups/create" class="btn btn-primary float-end">
-            Добавить группу
+          Пользователи
+          <router-link to="/users/create" class="btn btn-primary float-end">
+            Добавить пользователя
           </router-link>
         </h4>
       </div>
@@ -14,26 +14,30 @@
           <thead>
           <tr>
             <th>ID</th>
-            <th>Название</th>
-            <th>Вместимость</th>
-            <th>Курс</th>
+            <th>Логин</th>
+            <th>Пароль</th>
+            <th>Тип пользователя</th>
+            <th>Клиент</th>
             <th>Действия</th>
           </tr>
           </thead>
           <tbody>
-            <tr v-for="(group, idx) in groups" :key="idx">
-              <td>{{ group.id }}</td>
-              <td>{{ group.name }}</td>
-              <td>{{ group.capacity }}</td>
-              <td>{{ group.course.name }} ({{group.course.language}})</td>
+            <tr v-for="(user, idx) in users" :key="idx">
+              <td>{{ user.id }}</td>
+              <td>{{ user.login }}</td>
+              <td>{{ user.password }}</td>
+              <td>{{ types[user.type] }}</td>
+              <td v-if="user.client !== null">
+                {{ user.client.surname }} {{ user.client.name }} {{ user.client.patronymic }}</td>
+              <td v-else></td>
               <td>
                 <router-link
-                    :to="{ path: '/groups/' + group.id + '/edit' }"
+                    :to="{ path: '/users/' + user.id + '/edit' }"
                     class="btn btn-success me-1"
                 >
                   Edit
                 </router-link>
-                <button type="button" class="btn btn-danger" @click="deleteGroup(group.id)">
+                <button type="button" class="btn btn-danger" @click="deleteUser(user.id)">
                   Delete
                 </button>
               </td>
@@ -53,25 +57,29 @@
   import axios from "axios";
 
   export default {
-    name: "groups",
+    name: "users",
     data() {
       return {
-        groups: []
+        users: [],
+        types: {
+          user: 'Пользователь',
+          admin: 'Администратор'
+        }
       }
     },
     mounted() {
-      this.getGroups()
+      this.getUsers()
     },
     methods: {
-      getGroups() {
-        axios.get('http://localhost:8081/api/groups/all').then(res => {
-          this.groups = res.data
+      getUsers() {
+        axios.get('http://localhost:8081/api/users/all').then(res => {
+          this.users = res.data
         })
       },
-      deleteGroup(id) {
+      deleteUser(id) {
         if(confirm("Вы действительно хотите удалить данные?")) {
-          axios.delete(`http://localhost:8081/api/groups/${id}`).then(() => {
-            this.getGroups()
+          axios.delete(`http://localhost:8081/api/users/${id}`).then(() => {
+            this.getUsers()
           })
         }
       }

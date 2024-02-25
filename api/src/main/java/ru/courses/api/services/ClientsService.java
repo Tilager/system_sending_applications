@@ -2,48 +2,50 @@ package ru.courses.api.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.courses.api.models.ApplicationModel;
-import ru.courses.api.repositories.ApplicationsRepo;
+import ru.courses.api.models.ClientModel;
+import ru.courses.api.repositories.ClientsRepo;
 
 import java.util.List;
 
 @Service
-public class ApplicationsService {
-    private final ApplicationsRepo repo;
+public class ClientsService {
+    private final ClientsRepo repo;
 
     @Autowired
-    public ApplicationsService(ApplicationsRepo applicationsRepo) {
-        this.repo = applicationsRepo;
+    public ClientsService(ClientsRepo clientsRepo) {
+        this.repo = clientsRepo;
     }
 
-    public ApplicationModel createApplication(ApplicationModel application) {
-        return repo.save(application);
+    public ClientModel createClient(ClientModel client) {
+        return repo.save(client);
     }
 
-    public ApplicationModel getApplicationByID(Integer id) {
+    public ClientModel getClientByID(Integer id) {
         return repo.findById(id).orElse(null);
     }
 
-    public List<ApplicationModel> getAllApplications() {
+    public List<ClientModel> getAllClients() {
         return repo.findAll();
     }
 
-    public ApplicationModel updateApplication(ApplicationModel newApplication) {
-        ApplicationModel application = getApplicationByID(newApplication.getId());
+    public ClientModel updateClient(int id, ClientModel newClient) {
+        ClientModel client = getClientByID(id);
 
-        if (application == null) {
-            throw new RuntimeException("Application id = " + newApplication.getId() + ". Not found");
+        if (client == null) {
+            throw new RuntimeException("Client id = " + newClient.getId() + ". Not found");
         } else {
-            application.setStatus(newApplication.getStatus());
-            application.setClient(newApplication.getClient());
-            application.setCourse(newApplication.getCourse());
-            application.setSubmissionDate(newApplication.getSubmissionDate());
+            client.setName(newClient.getName());
+            client.setSurname(newClient.getSurname());
+            client.setPatronymic(newClient.getPatronymic());
+            client.setPhone(newClient.getPhone());
+            client.setEmail(newClient.getEmail());
+            client.setBirthday(newClient.getBirthday());
 
-            return repo.save(application);
+            return repo.save(client);
         }
     }
 
-    public void removeApplicationByID(int id) {
+    public void removeClientByID(int id) {
         repo.deleteById(id);
     }
 }

@@ -2,11 +2,11 @@
   <div class="container mt-5">
     <div class="card">
       <div class="card-header">
-        Добавление клиента
+        Регистрация
       </div>
       <div class="card-body">
         <div class="alert alert-success" role="alert" v-if="alert === 'success'">
-          Данные успешно добавлены!
+          Пользователь успешно зарегистрировался
         </div>
         <div class="alert alert-danger" role="alert" v-if="alert === 'danger'">
           Проверьте все поля!
@@ -49,7 +49,19 @@
                  :class="{'is-invalid': (v$.model.client.birthday.$dirty && v$.model.client.birthday.$error)}">
         </div>
         <div class="mb-3">
-          <button class="btn btn-primary" @click="saveClient" type="button">Сохранить</button>
+          <label for="">Логин</label>
+          <input v-model="model.user.login"
+                 type="text" class="form-control"
+                 :class="{'is-invalid': (v$.model.user.login.$dirty && v$.model.user.login.$error)}">
+        </div>
+        <div class="mb-3">
+          <label for="">Пароль</label>
+          <input v-model="model.user.password"
+                 type="text" class="form-control"
+                 :class="{'is-invalid': (v$.model.user.password.$dirty && v$.model.user.password.$error)}">
+        </div>
+        <div class="mb-3">
+          <button class="btn btn-primary" @click="saveUser" type="button">Сохранить</button>
         </div>
       </div>
     </div>
@@ -74,32 +86,30 @@
             phone: '',
             email: '',
             birthday: null
+          },
+          user: {
+            login: '',
+            password: ''
           }
         }
       }
     },
     methods: {
-      saveClient() {
+      saveUser() {
         if (this.v$.$invalid) {
           this.v$.$touch()
           this.alert = 'danger'
           return
         }
 
-        axios.post("http://localhost:8081/api/clients/create",
-            this.model.client)
+        axios.post("http://localhost:8081/auth/register",
+            {client: this.model.client,
+                  user: this.model.user})
             .then(res => {
-              this.model.client = {
-                name: '',
-                surname: '',
-                patronymic: '',
-                phone: '',
-                email: '',
-                birthday: null
-              }
-
               this.alert = 'success'
               this.v$.$reset()
+            }).catch(err => {
+              alert(err.response.data)
             })
       }
     },
@@ -119,6 +129,10 @@
                 let age = Math.abs(new Date(Date.now() - new Date(value)).getUTCFullYear() - 1970)
                 return age >= 18 && age <= 100
               }}
+          },
+          user: {
+            login: { required },
+            password: { required }
           }
         }
       }

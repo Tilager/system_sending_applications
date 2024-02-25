@@ -2,50 +2,52 @@ package ru.courses.api.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.courses.api.models.TeacherModel;
-import ru.courses.api.repositories.TeachersRepo;
+import ru.courses.api.models.UserModel;
+import ru.courses.api.repositories.UsersRepo;
 
 import java.util.List;
 
 @Service
-public class TeachersService {
-    private final TeachersRepo repo;
+public class UsersService {
+    private final UsersRepo repo;
 
     @Autowired
-    public TeachersService(TeachersRepo teachersRepo) {
-        this.repo = teachersRepo;
+    public UsersService(UsersRepo usersRepo) {
+        this.repo = usersRepo;
     }
 
-    public TeacherModel createTeacher(TeacherModel teacher) {
-        return repo.save(teacher);
+    public UserModel createUser(UserModel user) {
+        return repo.save(user);
     }
 
-    public TeacherModel getTeacherByID(Integer id) {
+    public UserModel getUserByID(Integer id) {
         return repo.findById(id).orElse(null);
     }
 
-    public List<TeacherModel> getAllTeachers() {
+    public List<UserModel> getAllUsers() {
         return repo.findAll();
     }
 
-    public TeacherModel updateTeacher(TeacherModel newTeacher) {
-        TeacherModel teacher = getTeacherByID(newTeacher.getId());
+    public UserModel updateUser(int id, UserModel newUser) {
+        UserModel user = getUserByID(id);
 
-        if (teacher == null) {
-            throw new RuntimeException("Teacher id = " + newTeacher.getId() + ". Not found");
+        if (user == null) {
+            throw new RuntimeException("User id = " + newUser.getId() + ". Not found");
         } else {
-            teacher.setName(newTeacher.getName());
-            teacher.setSurname(newTeacher.getSurname());
-            teacher.setPatronymic(newTeacher.getPatronymic());
-            teacher.setEmail(newTeacher.getEmail());
-            teacher.setPhone(newTeacher.getPhone());
-            teacher.setPicture(newTeacher.getPicture());
+            user.setClient(newUser.getClient());
+            user.setType(newUser.getType());
+            user.setLogin(newUser.getLogin());
+            user.setPassword(newUser.getPassword());
 
-            return repo.save(teacher);
+            return repo.save(user);
         }
     }
 
-    public void removeTeacherByID(int id) {
+    public void removeUserByID(int id) {
         repo.deleteById(id);
+    }
+
+    public UserModel getUserByLogin(String login) {
+        return repo.getByLogin(login);
     }
 }

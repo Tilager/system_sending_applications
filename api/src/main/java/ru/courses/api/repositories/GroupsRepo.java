@@ -1,7 +1,10 @@
 package ru.courses.api.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.courses.api.models.CourseModel;
+import ru.courses.api.models.GroupModel;
 
-public interface CoursesRepo extends JpaRepository<CourseModel, Integer> {
+import java.util.List;
+
+public interface GroupsRepo extends JpaRepository<GroupModel, Integer> {
+    List<GroupModel> getAllByCourse_Id(int courseId);
 }

@@ -2,11 +2,11 @@
   <div class="container mt-5">
     <div class="card">
       <div class="card-header">
-        Добавление учителя
+        Изменение учителя
       </div>
       <div class="card-body">
         <div class="alert alert-success" role="alert" v-if="alert === 'success'">
-          Данные успешно добавлены!
+          Данные успешно обновлены!
         </div>
         <div class="alert alert-danger" role="alert" v-if="alert === 'danger'">
           Проверьте все поля!
@@ -43,7 +43,7 @@
                  :class="{'is-invalid': (v$.model.teacher.email.$dirty && v$.model.teacher.email.$error)}">
         </div>
         <div class="mb-3">
-          <button class="btn btn-primary" @click="saveTeacher" type="button">Сохранить</button>
+          <button class="btn btn-primary" @click="updateTeacher" type="button">Сохранить</button>
         </div>
       </div>
     </div>
@@ -56,7 +56,7 @@
   import {email, required} from "@vuelidate/validators";
 
   export default {
-    name: 'teachersCreate',
+    name: 'teacherEdit',
     data() {
       return {
         alert: '',
@@ -71,25 +71,32 @@
         }
       }
     },
+    mounted() {
+      this.getTeacher(this.$route.params.id)
+    },
     methods: {
-      saveTeacher() {
+      getTeacher(id) {
+        axios.get(`http://localhost:8081/api/teachers/${id}`).then(res => {
+          if (!res.data) {
+            alert("Страница не найдена!")
+            window.location.replace("/teachers")
+          }
+          else {
+            this.model.teacher = res.data
+          }
+        })
+      },
+      updateTeacher() {
         if (this.v$.$invalid) {
           this.v$.$touch()
           this.alert = 'danger'
           return
         }
 
-        axios.post("http://localhost:8081/api/createTeacher",
+        axios.post(`http://localhost:8081/api/teachers/${this.$route.params.id}`,
             this.model.teacher)
             .then(res => {
-              this.model.teacher = {
-                name: '',
-                surname: '',
-                patronymic: '',
-                phone: '',
-                email: ''
-              }
-
+              this.model.teacher = res.data
               this.alert = 'success'
               this.v$.$reset()
             })

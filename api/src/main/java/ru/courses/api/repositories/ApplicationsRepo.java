@@ -1,2 +1,8 @@
-package ru.courses.api.repositories;public interface ApplicationsRepo {
+package ru.courses.api.repositories;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import ru.courses.api.models.ApplicationModel;
+
+public interface ApplicationsRepo extends JpaRepository<ApplicationModel, Integer> {
+    ApplicationModel getByClient_IdAndCourse_Id(int clientId, int courseId);
 }

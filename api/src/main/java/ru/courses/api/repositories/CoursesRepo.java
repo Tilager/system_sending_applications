@@ -1,7 +1,7 @@
 package ru.courses.api.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.courses.api.models.ClientModel;
+import ru.courses.api.models.CourseModel;
 
-public interface ClientsRepo extends JpaRepository<ClientModel, Integer> {
+public interface CoursesRepo extends JpaRepository<CourseModel, Integer> {
 }

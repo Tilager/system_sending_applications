@@ -2,7 +2,7 @@
   <div class="container mt-5">
     <div class="card">
       <div class="card-header">
-        Изменение курса
+        Изменение группы
       </div>
       <div class="card-body">
         <div class="alert alert-success" role="alert" v-if="alert === 'success'">
@@ -14,50 +14,34 @@
 
         <div class="mb-3">
           <label for="">Название</label>
-          <input v-model="model.course.name"
+          <input v-model="model.group.name"
                  type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.course.name.$dirty && v$.model.course.name.$error)}">
+                 :class="{'is-invalid': (v$.model.group.name.$dirty && v$.model.group.name.$error)}">
         </div>
         <div class="mb-3">
-          <label for="">Описание</label>
-          <input v-model="model.course.description"
+          <label for="">Вместимость</label>
+          <input v-model="model.group.capacity"
                  type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.course.description.$dirty && v$.model.course.description.$error)}">
+                 :class="{'is-invalid': (v$.model.group.capacity.$dirty && v$.model.group.capacity.$error)}">
         </div>
-        <div class="mb-3">
-          <label for="">Язык</label>
-          <input v-model="model.course.language"
-                 type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.course.language.$dirty && v$.model.course.language.$error)}">
-        </div>
-        <div class="mb-3">
-          <label for="">Длительность (Ч)</label>
-          <input v-model="model.course.duration"
-                 type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.course.duration.$dirty && v$.model.course.duration.$error)}">
-        </div>
-        <div class="mb-3">
-          <label for="">Цена</label>
-          <input v-model="model.course.price"
-                 type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.course.price.$dirty && v$.model.course.price.$error)}">
-        </div>
-        <div class="mb-3">
-          <label for="">Преподаватель</label>
 
-          <select class="form-control mb-3"
-                  :class="{'is-invalid': (v$.model.course.teacher.$dirty && v$.model.course.teacher.$error)}"
-                  @change="setTeacher"
-          >
-            <option disabled selected value> Выберите преподавателя </option>
-            <option v-for="teacher in teachers"
-                    :value="teacher.id" :selected="teacher.id === model.course.teacher.id"> {{ teacher.surname }} {{ teacher.name }} {{ teacher.patronymic }} </option>
-          </select>
         <div class="mb-3">
-          <button class="btn btn-primary" @click="updateCourse" type="button">Сохранить</button>
+          <label for="">Курс</label>
+
+          <select class="form-control"
+                  :class="{'is-invalid': (v$.model.group.course.$dirty && v$.model.group.course.$error)}"
+                  @change="setCourse"
+          >
+            <option disabled selected value> Выберите курс </option>
+            <option v-for="course in courses"
+                    :value="course.id" :selected="course.id === model.group.course.id"> {{ course.name }} ({{ course.language }})</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <button class="btn btn-primary" @click="updateGroups" type="button">Сохранить</button>
         </div>
       </div>
-    </div>
     </div>
   </div>
 </template>
@@ -68,56 +52,53 @@
   import {email, integer, minValue, numeric, required} from "@vuelidate/validators";
 
   export default {
-    name: 'coursesEdit',
+    name: 'groupsEdit',
     data() {
       return {
         alert: '',
         model: {
-          course: {
+          group: {
             name: '',
-            description: '',
-            language: '',
-            duration: null,
-            price: null,
-            teacher: null
+            capacity: null,
+            course: null
           }
         },
-        teachers: []
+        courses: []
       }
     },
     mounted() {
-      this.getCourse(this.$route.params.id)
+      this.getGroup(this.$route.params.id)
 
-      axios.get('http://localhost:8081/api/teachers/all').then(res => {
-        this.teachers = res.data
+      axios.get('http://localhost:8081/api/courses/all').then(res => {
+        this.courses = res.data
       })
     },
     methods: {
-      setTeacher(event) {
-        this.model.course.teacher = this.teachers.find(t => t.id == event.target.value)
+      setCourse(event) {
+        this.model.group.course = this.courses.find(c => c.id == event.target.value)
       },
-      getCourse(id) {
-        axios.get(`http://localhost:8081/api/courses/${id}`).then(res => {
+      getGroup(id) {
+        axios.get(`http://localhost:8081/api/groups/${id}`).then(res => {
           if (!res.data) {
             alert("Страница не найдена!")
-            window.location.replace("/courses")
+            window.location.replace("/groups")
           }
           else {
-            this.model.course = res.data
+            this.model.group = res.data
           }
         })
       },
-      updateCourse() {
+      updateGroups() {
         if (this.v$.$invalid) {
           this.v$.$touch()
           this.alert = 'danger'
           return
         }
 
-        axios.post(`http://localhost:8081/api/courses/${this.$route.params.id}`,
-            this.model.course)
+        axios.post(`http://localhost:8081/api/groups/${this.$route.params.id}`,
+            this.model.group)
             .then(res => {
-              this.model.course = res.data
+              this.model.group = res.data
               this.alert = 'success'
               this.v$.$reset()
             })
@@ -127,13 +108,10 @@
     validations() {
       return {
         model: {
-          course: {
+          group: {
             name: { required },
-            description: { required },
-            language: { required },
-            duration: {required, integer, minValue: minValue(1)},
-            price: {required, numeric, minValue: minValue(0)},
-            teacher: {required}
+            capacity: {required, integer, minValue: minValue(1)},
+            course: {required}
           }
         }
       }

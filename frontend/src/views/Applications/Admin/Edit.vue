@@ -43,7 +43,6 @@
 <script>
   import axios from "axios";
   import useVuelidate from "@vuelidate/core";
-  import login from "@/views/Auth/Login.vue";
 
   export default {
     name: 'applicationsEdit',

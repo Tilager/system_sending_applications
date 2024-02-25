@@ -2,7 +2,7 @@
   <div class="container mt-5">
     <div class="card">
       <div class="card-header">
-        Изменение учителя
+        Изменение клиента
       </div>
       <div class="card-body">
         <div class="alert alert-success" role="alert" v-if="alert === 'success'">
@@ -14,36 +14,42 @@
 
         <div class="mb-3">
           <label for="">Фамилия</label>
-          <input v-model="model.teacher.surname"
+          <input v-model="model.client.surname"
                  type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.teacher.surname.$dirty && v$.model.teacher.surname.$error)}">
+                 :class="{'is-invalid': (v$.model.client.surname.$dirty && v$.model.client.surname.$error)}">
         </div>
         <div class="mb-3">
           <label for="">Имя</label>
-          <input v-model="model.teacher.name"
+          <input v-model="model.client.name"
                  type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.teacher.name.$dirty && v$.model.teacher.name.$error)}">
+                 :class="{'is-invalid': (v$.model.client.name.$dirty && v$.model.client.name.$error)}">
         </div>
         <div class="mb-3">
           <label for="">Отчество</label>
-          <input v-model="model.teacher.patronymic"
+          <input v-model="model.client.patronymic"
                  type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.teacher.patronymic.$dirty && v$.model.teacher.patronymic.$error)}">
+                 :class="{'is-invalid': (v$.model.client.patronymic.$dirty && v$.model.client.patronymic.$error)}">
         </div>
         <div class="mb-3">
           <label for="">Номер телефона</label>
-          <input v-model="model.teacher.phone"
+          <input v-model="model.client.phone"
                  type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.teacher.phone.$dirty && v$.model.teacher.phone.$error)}">
+                 :class="{'is-invalid': (v$.model.client.phone.$dirty && v$.model.client.phone.$error)}">
         </div>
         <div class="mb-3">
           <label for="">Почта</label>
-          <input v-model="model.teacher.email"
+          <input v-model="model.client.email"
                  type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.teacher.email.$dirty && v$.model.teacher.email.$error)}">
+                 :class="{'is-invalid': (v$.model.client.email.$dirty && v$.model.client.email.$error)}">
         </div>
         <div class="mb-3">
-          <button class="btn btn-primary" @click="updateTeacher" type="button">Сохранить</button>
+          <label for="">Дата рождения</label>
+          <input v-model="model.client.birthday"
+                 type="date" class="form-control"
+                 :class="{'is-invalid': (v$.model.client.birthday.$dirty && v$.model.client.birthday.$error)}">
+        </div>
+        <div class="mb-3">
+          <button class="btn btn-primary" @click="updateClient" type="button">Сохранить</button>
         </div>
       </div>
     </div>
@@ -56,47 +62,48 @@
   import {email, required} from "@vuelidate/validators";
 
   export default {
-    name: 'teacherEdit',
+    name: 'clientEdit',
     data() {
       return {
         alert: '',
         model: {
-          teacher: {
+          client: {
             name: '',
             surname: '',
             patronymic: '',
             phone: '',
-            email: ''
+            email: '',
+            birthday: null
           }
         }
       }
     },
     mounted() {
-      this.getTeacher(this.$route.params.id)
+      this.getClient(this.$route.params.id)
     },
     methods: {
-      getTeacher(id) {
-        axios.get(`http://localhost:8081/api/teachers/${id}`).then(res => {
+      getClient(id) {
+        axios.get(`http://localhost:8081/api/clients/${id}`).then(res => {
           if (!res.data) {
             alert("Страница не найдена!")
-            window.location.replace("/teachers")
+            window.location.replace("/clients")
           }
           else {
-            this.model.teacher = res.data
+            this.model.client = res.data
           }
         })
       },
-      updateTeacher() {
+      updateClient() {
         if (this.v$.$invalid) {
           this.v$.$touch()
           this.alert = 'danger'
           return
         }
 
-        axios.post(`http://localhost:8081/api/teachers/${this.$route.params.id}`,
-            this.model.teacher)
+        axios.post(`http://localhost:8081/api/clients/${this.$route.params.id}`,
+            this.model.client)
             .then(res => {
-              this.model.teacher = res.data
+              this.model.client = res.data
               this.alert = 'success'
               this.v$.$reset()
             })
@@ -106,14 +113,15 @@
     validations() {
       return {
         model: {
-          teacher: {
+          client: {
             name: { required },
             surname: { required },
             patronymic: { required },
             phone: { required, phone: value => {
                 return /^(^8|7|\+7)((\d{10})|(\s\(\d{3}\)\s\d{3}\s\d{2}\s\d{2}))$/.test(value)
               }},
-            email: { required, email }
+            email: { required, email },
+            birthday: {required}
           }
         }
       }

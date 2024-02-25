@@ -2,51 +2,55 @@ package ru.courses.api.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.courses.api.models.CourseModel;
-import ru.courses.api.repositories.CoursesRepo;
+import ru.courses.api.models.GroupModel;
+import ru.courses.api.repositories.GroupsRepo;
 
 import java.util.List;
 
 @Service
-public class CoursesService {
-    private final CoursesRepo repo;
+public class GroupsService {
+    private final GroupsRepo repo;
 
     @Autowired
-    public CoursesService(CoursesRepo coursesRepo) {
-        this.repo = coursesRepo;
+    public GroupsService(GroupsRepo groupsRepo) {
+        this.repo = groupsRepo;
     }
 
-    public CourseModel createCourse(CourseModel course) {
-        return repo.save(course);
+    public GroupModel createGroup(GroupModel group) {
+        return repo.save(group);
     }
 
-    public CourseModel getCourseByID(Integer id) {
+    public GroupModel getGroupByID(Integer id) {
         return repo.findById(id).orElse(null);
     }
 
-    public List<CourseModel> getAllCourses() {
+    public List<GroupModel> getAllGroups() {
         return repo.findAll();
     }
 
-    public CourseModel updateCourse(CourseModel newCourse) {
-        CourseModel course = getCourseByID(newCourse.getId());
+    public GroupModel updateGroup(Integer id, GroupModel newGroup) {
+        GroupModel group = getGroupByID(id);
 
-        if (course == null) {
-            throw new RuntimeException("Client id = " + newCourse.getId() + ". Not found");
+        if (group == null) {
+            throw new RuntimeException("Group id = " + newGroup.getId() + ". Not found");
         } else {
-            course.setName(newCourse.getName());
-            course.setDescription(newCourse.getDescription());
-            course.setDuration(newCourse.getDuration());
-            course.setImage(course.getImage());
-            course.setLanguage(newCourse.getLanguage());
-            course.setPrice(newCourse.getPrice());
-            course.setTeacher(newCourse.getTeacher());
+            group.setCapacity(newGroup.getCapacity());
+            group.setName(newGroup.getName());
+            group.setCourse(newGroup.getCourse());
 
-            return repo.save(course);
+            return repo.save(group);
         }
     }
 
-    public void removeCourseByID(int id) {
+    public List<GroupModel> getAllGroupsByCourse(int courseId) {
+        return repo.getAllByCourse_Id(courseId);
+    }
+
+    public void removeGroupByID(int id) {
         repo.deleteById(id);
+    }
+
+    public int getStudentsCount(int groupId) {
+        return getGroupByID(groupId).getApplications().size();
     }
 }

@@ -1,46 +1,18 @@
 <template>
   <div class="container">
-    <div class="card mt-5">
+    <div class="card mt-5" style="width: 23rem;" v-for="course in courses">
       <div class="card-header">
         <h4>
-          Заявки
+          {{ course.name }}
         </h4>
       </div>
       <div class="card-body">
-        <table class="table table-bordered">
-          <thead>
-          <tr>
-            <th>ID</th>
-            <th>Статус заявки</th>
-            <th>Дата заявки</th>
-            <th>Клиент</th>
-            <th>Курс</th>
-            <th>Группа</th>
-            <th>Действия</th>
-          </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(application, idx) in applications" :key="idx">
-              <td>{{ application.id }}</td>
-              <td>{{ this.status[application.status] }}</td>
-              <td>{{ application.submissionDate }}</td>
-              <td>{{ application.client.surname }} {{application.client.name}} {{ application.client.patronymic }}</td>
-              <td>{{ application.course.name }} ({{application.course.language}})</td>
-              <td v-if="application.group">{{ application.group.name }}</td>
-              <td v-else></td>
-              <td>
-                <router-link
-                    :to="{ path: '/applications/' + application.id + '/edit' }"
-                    class="btn btn-success me-1">
-                  Edit
-                </router-link>
-                <button type="button" class="btn btn-danger" @click="deleteApplication(application.id)">
-                  Delete
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <h5> {{ course.name }} </h5>
+        <p> Описание: {{ course.description }} </p>
+        <p> Язык: {{ course.language }} </p>
+        <p> Длительность: {{ course.duration }} часов </p>
+        <p> Цена: {{ course.price === 0 ? 'Бесплатно' : course.price + ' рублей' }} </p>
+        <button class="btn btn-primary mt-2" @click="sendApplication(course.id)">Отправить заявку</button>
       </div>
     </div>
   </div>
@@ -52,35 +24,47 @@
 
 <script>
   import axios from "axios";
+  import {mapGetters} from "vuex";
 
   export default {
     name: "applications",
     data() {
       return {
-        applications: [],
-        status: {
-          consideration: 'На рассмотрении',
-          access: 'Принято',
-          rejected: 'Отклонено'
-        }
+        courses: []
       }
     },
     mounted() {
-      this.getApplications()
+      axios.get('http://localhost:8081/api/courses/all').then(res => {
+        this.courses = res.data
+      })
     },
     methods: {
-      getApplications() {
-        axios.get('http://localhost:8081/api/applications/all').then(res => {
-          this.applications = res.data
-        })
-      },
-      deleteApplication(id) {
-        if(confirm("Вы действительно хотите удалить данные?")) {
-          axios.delete(`http://localhost:8081/api/applications/${id}`).then(() => {
-            this.getApplications()
-          })
+      sendApplication(id) {
+        let data = {
+          client: this.currentUser.client,
+          course: this.courses.find(c => c.id === id)
         }
+
+        axios.post("http://localhost:8081/api/application/create",
+            data)
+            .then(() => {
+              alert('Заявка успешно отправлена!')
+            }).catch(err => {
+                if(err.response.status === 409) {
+                  alert(err.response.data)
+                }
+                else {
+                  console.error(err.response.data)
+                }
+            })
       }
-    }
+    },
+    computed: mapGetters(['currentUser'])
   }
 </script>
+
+<style scoped>
+  .card-body p {
+    margin-bottom: 6px;
+  }
+</style>

@@ -2,7 +2,7 @@
   <div class="container mt-5">
     <div class="card">
       <div class="card-header">
-        Изменение учителя
+        Изменение курса
       </div>
       <div class="card-body">
         <div class="alert alert-success" role="alert" v-if="alert === 'success'">
@@ -13,39 +13,53 @@
         </div>
 
         <div class="mb-3">
-          <label for="">Фамилия</label>
-          <input v-model="model.teacher.surname"
+          <label for="">Название</label>
+          <input v-model="model.course.name"
                  type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.teacher.surname.$dirty && v$.model.teacher.surname.$error)}">
+                 :class="{'is-invalid': (v$.model.course.name.$dirty && v$.model.course.name.$error)}">
         </div>
         <div class="mb-3">
-          <label for="">Имя</label>
-          <input v-model="model.teacher.name"
+          <label for="">Описание</label>
+          <input v-model="model.course.description"
                  type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.teacher.name.$dirty && v$.model.teacher.name.$error)}">
+                 :class="{'is-invalid': (v$.model.course.description.$dirty && v$.model.course.description.$error)}">
         </div>
         <div class="mb-3">
-          <label for="">Отчество</label>
-          <input v-model="model.teacher.patronymic"
+          <label for="">Язык</label>
+          <input v-model="model.course.language"
                  type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.teacher.patronymic.$dirty && v$.model.teacher.patronymic.$error)}">
+                 :class="{'is-invalid': (v$.model.course.language.$dirty && v$.model.course.language.$error)}">
         </div>
         <div class="mb-3">
-          <label for="">Номер телефона</label>
-          <input v-model="model.teacher.phone"
+          <label for="">Длительность (Ч)</label>
+          <input v-model="model.course.duration"
                  type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.teacher.phone.$dirty && v$.model.teacher.phone.$error)}">
+                 :class="{'is-invalid': (v$.model.course.duration.$dirty && v$.model.course.duration.$error)}">
         </div>
         <div class="mb-3">
-          <label for="">Почта</label>
-          <input v-model="model.teacher.email"
+          <label for="">Цена</label>
+          <input v-model="model.course.price"
                  type="text" class="form-control"
-                 :class="{'is-invalid': (v$.model.teacher.email.$dirty && v$.model.teacher.email.$error)}">
+                 :class="{'is-invalid': (v$.model.course.price.$dirty && v$.model.course.price.$error)}">
         </div>
         <div class="mb-3">
-          <button class="btn btn-primary" @click="updateTeacher" type="button">Сохранить</button>
+          <label for="">Преподаватель</label>
+
+          <select class="form-control mb-3"
+                  :class="{'is-invalid': (v$.model.course.teacher.$dirty && v$.model.course.teacher.$error)}"
+                  @change="setTeacher"
+          >
+            <option disabled selected value> Выберите преподавателя </option>
+            <option v-for="teacher in teachers"
+                    :value="teacher.id" :selected="model.course.teacher && teacher.id === model.course.teacher.id"
+                    > {{ teacher.surname }} {{ teacher.name }} {{ teacher.patronymic }} </option>
+          </select>
         </div>
-      </div>
+
+        <div class="mb-3">
+          <button class="btn btn-primary" @click="updateCourse" type="button">Сохранить</button>
+        </div>
+    </div>
     </div>
   </div>
 </template>
@@ -53,50 +67,59 @@
 <script>
   import axios from "axios";
   import useVuelidate from "@vuelidate/core";
-  import {email, required} from "@vuelidate/validators";
+  import {email, integer, minValue, numeric, required} from "@vuelidate/validators";
 
   export default {
-    name: 'teacherEdit',
+    name: 'coursesEdit',
     data() {
       return {
         alert: '',
         model: {
-          teacher: {
+          course: {
             name: '',
-            surname: '',
-            patronymic: '',
-            phone: '',
-            email: ''
+            description: '',
+            language: '',
+            duration: null,
+            price: null,
+            teacher: null
           }
-        }
+        },
+        teachers: []
       }
     },
     mounted() {
-      this.getTeacher(this.$route.params.id)
+      this.getCourse(this.$route.params.id)
+
+      axios.get('http://localhost:8081/api/teachers/all').then(res => {
+        this.teachers = res.data
+      })
     },
     methods: {
-      getTeacher(id) {
-        axios.get(`http://localhost:8081/api/teachers/${id}`).then(res => {
+      setTeacher(event) {
+        this.model.course.teacher = this.teachers.find(t => t.id == event.target.value)
+      },
+      getCourse(id) {
+        axios.get(`http://localhost:8081/api/courses/${id}`).then(res => {
           if (!res.data) {
             alert("Страница не найдена!")
-            window.location.replace("/teachers")
+            window.location.replace("/courses")
           }
           else {
-            this.model.teacher = res.data
+            this.model.course = res.data
           }
         })
       },
-      updateTeacher() {
+      updateCourse() {
         if (this.v$.$invalid) {
           this.v$.$touch()
           this.alert = 'danger'
           return
         }
 
-        axios.post(`http://localhost:8081/api/teachers/${this.$route.params.id}`,
-            this.model.teacher)
+        axios.post(`http://localhost:8081/api/courses/${this.$route.params.id}`,
+            this.model.course)
             .then(res => {
-              this.model.teacher = res.data
+              this.model.course = res.data
               this.alert = 'success'
               this.v$.$reset()
             })
@@ -106,14 +129,13 @@
     validations() {
       return {
         model: {
-          teacher: {
+          course: {
             name: { required },
-            surname: { required },
-            patronymic: { required },
-            phone: { required, phone: value => {
-                return /^(^8|7|\+7)((\d{10})|(\s\(\d{3}\)\s\d{3}\s\d{2}\s\d{2}))$/.test(value)
-              }},
-            email: { required, email }
+            description: { required },
+            language: { required },
+            duration: {required, integer, minValue: minValue(1)},
+            price: {required, numeric, minValue: minValue(0)},
+            teacher: {required}
           }
         }
       }

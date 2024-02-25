@@ -81,11 +81,14 @@
             price: null,
             teacher: null
           }
-        }
+        },
+        teachers: []
       }
     },
     mounted() {
-
+      axios.get('http://localhost:8081/api/teachers/all').then(res => {
+        this.teachers = res.data
+      })
     },
     methods: {
       setTeacher(event) {

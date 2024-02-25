@@ -3,9 +3,9 @@
     <div class="card mt-5">
       <div class="card-header">
         <h4>
-          Преподаватели
-          <router-link to="/teachers/create" class="btn btn-primary float-end">
-            Добавить преподавателя
+          Курсы
+          <router-link to="/courses/create" class="btn btn-primary float-end">
+            Добавить курс
           </router-link>
         </h4>
       </div>
@@ -14,27 +14,33 @@
           <thead>
           <tr>
             <th>ID</th>
-            <th>Имя</th>
-            <th>Фамилия</th>
-            <th>Отчество</th>
-            <th>Номер телефона</th>
-            <th>Почта</th>
+            <th>Название</th>
+            <th>Описание</th>
+            <th>Язык</th>
+            <th>Длительность</th>
+            <th>Цена</th>
+            <th>Преподаватель</th>
             <th>Действия</th>
           </tr>
           </thead>
           <tbody>
-            <tr v-for="(teacher, idx) in teachers" :key="idx">
-              <td>{{ teacher.id }}</td>
-              <td>{{ teacher.name }}</td>
-              <td>{{ teacher.surname }}</td>
-              <td>{{ teacher.patronymic }}</td>
-              <td>{{ teacher.phone }}</td>
-              <td>{{ teacher.email }}</td>
+            <tr v-for="(course, idx) in courses" :key="idx">
+              <td>{{ course.id }}</td>
+              <td>{{ course.name }}</td>
+              <td>{{ course.description }}</td>
+              <td>{{ course.language }}</td>
+              <td>{{ course.duration }} часов</td>
+              <td>{{ course.price }}</td>
+              <td v-if="course.teacher" >{{ course.teacher.surname }} {{ course.teacher.name }} {{ course.teacher.patronymic }}</td>
+              <td v-else></td>
               <td>
-                <router-link :to="{ path: '/teachers/' + teacher.id + '/edit' }" class="btn btn-success me-1">
+                <router-link
+                    :to="{ path: '/courses/' + course.id + '/edit' }"
+                    class="btn btn-success me-1"
+                >
                   Edit
                 </router-link>
-                <button type="button" class="btn btn-danger" @click="deleteTeacher(teacher.id)">
+                <button type="button" class="btn btn-danger" @click="deleteCourse(course.id)">
                   Delete
                 </button>
               </td>
@@ -54,25 +60,25 @@
   import axios from "axios";
 
   export default {
-    name: "teachers",
+    name: "courses",
     data() {
       return {
-        teachers: []
+        courses: []
       }
     },
     mounted() {
-      this.getTeachers()
+      this.getCourses()
     },
     methods: {
-      getTeachers() {
-        axios.get('http://localhost:8081/api/teachers/all').then(res => {
-          this.teachers = res.data
+      getCourses() {
+        axios.get('http://localhost:8081/api/courses/all').then(res => {
+          this.courses = res.data
         })
       },
-      deleteTeacher(id) {
+      deleteCourse(id) {
         if(confirm("Вы действительно хотите удалить данные?")) {
-          axios.delete(`http://localhost:8081/api/teachers/${id}`).then(() => {
-            this.getTeachers()
+          axios.delete(`http://localhost:8081/api/courses/${id}`).then(() => {
+            this.getCourses()
           })
         }
       }
