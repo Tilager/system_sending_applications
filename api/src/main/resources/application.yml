@@ -1,0 +1,22 @@
+spring:
+  # Database config
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: postgres
+    url: jdbc:postgresql://localhost/courses
+
+  jpa:
+    show-sql: true
+
+    # auto-create tables in database
+    generate-ddl: true
+
+  # Create sessions
+  session.jdbc:
+    initialize-schema: always
+    table-name: SPRING_SESSION
+
+
+server:
+  port: 8081
