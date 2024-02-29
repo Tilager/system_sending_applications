@@ -27,7 +27,7 @@
         <div class="mb-3">
           <label>Тип</label>
 
-          <select class="form-control"
+          <select class="form-control" :disabled="model.user.login === 'admin'"
                   :class="{'is-invalid': (v$.model.user.type.$dirty && v$.model.user.type.$error)}"
                   v-model="model.user.type"
           >

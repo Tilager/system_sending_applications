@@ -37,7 +37,7 @@
                 >
                   Edit
                 </router-link>
-                <button type="button" class="btn btn-danger" @click="deleteUser(user.id)">
+                <button type="button" class="btn btn-danger" @click="deleteUser(user.id)" :disabled="user.login === 'admin'">
                   Delete
                 </button>
               </td>
